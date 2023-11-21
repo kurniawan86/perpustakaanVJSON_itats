@@ -2,10 +2,12 @@ package Model;
 import DatabaseJSON.JSONbuku;
 import Node.NodeBuku;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
 import java.util.ArrayList;
 
 public class ModelBuku {
-    JSONbuku dbBuku;
+    public JSONbuku dbBuku;
     int inc_kode = 1;
 
     public ModelBuku(){
@@ -18,6 +20,8 @@ public class ModelBuku {
         this.dbBuku.writeJSON_buku(obj);
         this.inc_kode ++;
     }
+
+
 
     public void vieeAllbuku(){
         dbBuku.readJSON_buku();

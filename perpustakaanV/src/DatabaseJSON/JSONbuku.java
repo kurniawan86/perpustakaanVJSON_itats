@@ -3,18 +3,21 @@ package DatabaseJSON;
 import Node.NodeBuku;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class JSONbuku {
     private FileWriter file;
-    private JSONObject books;
+    private JSONArray books;
     private String name = "JSONbuku.json";
 
     public JSONbuku(){
-        books = new JSONObject();
+        books = new JSONArray();
         try {
             file = new FileWriter(name);
         } catch (IOException e) {
@@ -29,9 +32,25 @@ public class JSONbuku {
         buku_detail.put("Pengarang Buku", buku.pengarang);
         buku_detail.put("Tahun Terbit Buku", buku.tahun_terbit);
         buku_detail.put("Stok Buku", buku.getStok());
-        books.put("buku",buku_detail);
+//        JSONArray arrBuku = new JSONArray();
+//        arrBuku.add(buku_detail);
+        books.add(buku_detail);
+    }
+
+    public void commitInsert(){
         try {
             file.write(books.toJSONString());
+            file.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void insertBookList(ArrayList<NodeBuku> bukubuku){
+        String jsontext = JSONValue.toJSONString(bukubuku);
+        System.out.print(jsontext);
+        try {
+            file.write(jsontext);
             file.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -42,8 +61,22 @@ public class JSONbuku {
         JSONParser parser = new JSONParser();
         try {
             Reader reader = new FileReader(name);
-            JSONObject jsonObject = (JSONObject) parser.parse(reader);
-//            System.out.println(jsonObject);
+            JSONArray jsonArr = (JSONArray) parser.parse(reader);
+
+            Iterator<JSONArray> iterator = jsonArr.iterator();
+            System.out.println(iterator);
+            for (int i=0;i<jsonArr.size();i++){
+                System.out.println(jsonArr.get(i));
+                JSONObject obj = (JSONObject) jsonArr.get(i);
+                String Judul = obj.get("Judul Buku").toString();
+                int Kode = Integer.parseInt(obj.get("Kode Buku").toString());
+                int Tahun = Integer.parseInt(obj.get("Tahun Terbit Buku").toString());
+                System.out.println("kode buku : "+Kode);
+                System.out.println("judul buku : "+Judul);
+                System.out.println("Tahun buku : "+Tahun);
+
+//                System.out.println("tahun terbit : "+Tahun);
+            }
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
