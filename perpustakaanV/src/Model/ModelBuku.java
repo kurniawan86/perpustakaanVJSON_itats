@@ -1,66 +1,82 @@
 package Model;
 import DatabaseJSON.JSONbuku;
 import Node.NodeBuku;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
+import java.io.*;
 import java.util.ArrayList;
 
 public class ModelBuku {
-    public JSONbuku dbBuku;
-    int inc_kode = 1;
-
+    private JSONArray books;
+    private String fname = "buku.json";
     public ModelBuku(){
-        dbBuku = new JSONbuku();
+        books = new JSONArray();
+        createJSON();
+        loadJson();
     }
 
-    public void insertBook(String judul, String pengarang, int tahun){
-        int index = this.inc_kode;
-        NodeBuku obj = new NodeBuku(index,judul,pengarang,tahun);
-        this.dbBuku.writeJSON_buku(obj);
-        this.inc_kode ++;
+    public void insertBook(String judul_buku, String pengarang, int tahun_terbit){
+        JSONObject buku_detail = new JSONObject();
+        JSONObject temp = (JSONObject) books.get(books.size()-1);
+        int lastKode = Integer.parseInt(temp.get("Kode Buku").toString());
+
+        buku_detail.put("Kode Buku", lastKode+1);
+        buku_detail.put("Judul Buku", judul_buku);
+        buku_detail.put("Pengarang Buku", pengarang);
+        buku_detail.put("Tahun Terbit Buku", tahun_terbit);
+        buku_detail.put("Stok Buku", 0);
+
+        loadJson();
+        books.add(buku_detail);
+        saveToFileJson();
     }
 
-
-
-    public void vieeAllbuku(){
-        dbBuku.readJSON_buku();
+    private void saveToFileJson(){
+        FileWriter newfile = null;
+        try {
+            newfile = new FileWriter(fname);
+            newfile.write(books.toJSONString());
+            newfile.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
-//    public ArrayList<NodeBuku> viewBooks(){
-//        return books;
-//    }
-//    public void updateBook(String nama,int jumlah){
-//        for (int i=0;i<books.size();i++){
-//            if (nama.equals(books.get(i).judul_buku)){
-//                books.get(i).updateStok(jumlah);
-//            }
-//        }
-//    }
-//
-//    public void deleteBook(String judul){
-//        for (int i=0;i<books.size();i++){
-//            if (judul.equals(books.get(i).judul_buku)){
-//                books.remove(i);
-//            }
-//        }
-//    }
-//
-//    private int searchBook(String judul){
-//        int index = -1;
-//        for (int i=0;i<books.size();i++){
-//            if (judul.equals(books.get(i).getJudul_buku())){
-//                index = i;
-//            }
-//        }
-//        return index;
-//    }
-//
-//    public NodeBuku viewBook(String judul){
-//        NodeBuku buku = null;
-//        int index = searchBook(judul);
-//        if (index != -1){
-//            buku = books.get(index);
-//        }
-//        return buku;
-//    }
+    private void loadJson(){
+        JSONParser parser = new JSONParser();
+        try {
+            FileReader reader = new FileReader(fname);
+            books = (JSONArray) parser.parse(reader);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    private void createJSON(){
+        File file = new File(fname);
+        if (!file.exists()){
+            JSONObject buku_detail = new JSONObject();
+            buku_detail.put("Kode Buku", 0);
+            buku_detail.put("Judul Buku", 0);
+            buku_detail.put("Pengarang Buku", 0);
+            buku_detail.put("Tahun Terbit Buku", 0);
+            buku_detail.put("Stok Buku", 0);
+            JSONArray temp = new JSONArray();
+            temp.add(buku_detail);
+            FileWriter fileWriter = null;
+            try {
+                fileWriter = new FileWriter(fname);
+                fileWriter.write(temp.toJSONString());
+                fileWriter.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 }
